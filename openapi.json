@@ -1,0 +1,136 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ANAF CUI Lookup API",
+    "version": "1.0.0",
+    "description": "Look up Romanian company data by CUI using the official ANAF PlatitorTvaRest v9 registry."
+  },
+  "paths": {
+    "/v1/companies/{cui}": {
+      "get": {
+        "summary": "Get a company by CUI",
+        "operationId": "getCompany",
+        "security": [{ "ApiKey": [] }, { "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "cui",
+            "in": "path",
+            "required": true,
+            "description": "2 to 10 digits, optionally prefixed with RO.",
+            "schema": { "type": "string", "example": "RO14399840" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Company found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Company" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "429": { "$ref": "#/components/responses/Error" },
+          "502": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" },
+          "504": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/companies": {
+      "post": {
+        "summary": "Get several companies at once (max 100)",
+        "operationId": "batchCompanies",
+        "security": [{ "ApiKey": [] }, { "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cuis"],
+                "properties": {
+                  "cuis": { "type": "array", "maxItems": 100, "items": { "type": "string" }, "example": ["14399840", "RO18189442"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lookup results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "found": { "type": "array", "items": { "$ref": "#/components/schemas/Company" } },
+                    "notFound": { "type": "array", "items": { "type": "string" } },
+                    "invalid": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "429": { "$ref": "#/components/responses/Error" },
+          "502": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" },
+          "504": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Health check",
+        "operationId": "health",
+        "security": [],
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": { "type": "apiKey", "in": "header", "name": "X-API-Key" },
+      "Bearer": { "type": "http", "scheme": "bearer" }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "string", "example": "not_found" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Company": {
+        "type": "object",
+        "properties": {
+          "nume": { "type": "string" },
+          "cui": { "type": "string" },
+          "cuiFormatted": { "type": "string", "description": "CUI with RO prefix when VAT registered." },
+          "reg_com": { "type": "string", "nullable": true },
+          "strada": { "type": "string", "nullable": true },
+          "judet": { "type": "string", "nullable": true },
+          "locatie": { "type": "string", "nullable": true },
+          "cod_postal": { "type": "string", "nullable": true },
+          "adresaCompleta": { "type": "string", "nullable": true },
+          "telefon": { "type": "string", "nullable": true },
+          "email": { "type": "string", "nullable": true },
+          "scpTVA": { "type": "boolean" },
+          "statusInactivi": { "type": "boolean" },
+          "stare_inregistrare": { "type": "string", "nullable": true }
+        }
+      }
+    }
+  }
+}

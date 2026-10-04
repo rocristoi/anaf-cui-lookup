@@ -1,0 +1,15 @@
+services:
+  anaf-cui-lookup:
+    build: .
+    image: anaf-cui-lookup
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - path: .env
+        required: false
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
