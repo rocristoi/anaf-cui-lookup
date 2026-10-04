@@ -1,0 +1,27 @@
+services:
+  anaf-cui-lookup:
+    build: .
+    restart: unless-stopped
+    environment:
+      # Coolify assigns a domain and routes it to port 8080 through its proxy.
+      - SERVICE_FQDN_ANAF_8080
+      # Coolify generates a random value for this on first deploy.
+      # Replace it in the UI with a comma separated list if you want several keys.
+      - API_KEYS=${SERVICE_PASSWORD_APIKEY}
+      - TRUST_PROXY=true
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-3600}
+      - ANAF_TIMEOUT_SECONDS=${ANAF_TIMEOUT_SECONDS:-12}
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "/anaf-cui-lookup", "-healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m

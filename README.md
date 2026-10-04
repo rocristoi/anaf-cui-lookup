@@ -53,6 +53,16 @@ All settings are environment variables.
 - Logs are JSON on stdout. The Docker healthcheck is built in.
 - ANAF asks for modest request rates. The cache and the batch endpoint help you stay within them.
 
+## Deploy on Coolify
+
+1. Create a new resource from your Git repository and pick the **Docker Compose** build pack.
+2. Set the compose file location to `/docker-compose.coolify.yml`.
+3. Deploy. Coolify assigns a domain with TLS and generates the API key for you.
+
+After the first deploy, open the environment variables and copy `SERVICE_PASSWORD_APIKEY`. That is your API key. To use several keys, set `API_KEYS` to a comma separated list instead. `TRUST_PROXY` is already on, so rate limiting sees the real client IP.
+
+Prefer the plain **Dockerfile** build pack? That works too: set the exposed port to `8080`, add `API_KEYS` and `TRUST_PROXY=true` as variables, and the built-in healthcheck is picked up automatically.
+
 ## Run without Docker
 
 ```bash
